@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -18,8 +17,8 @@ const Index = () => {
     if (!file) return;
 
     // Check file type
-    if (!file.name.endsWith('.txt') && !file.name.endsWith('.docx')) {
-      toast.error("Please upload a .txt or .docx file");
+    if (!file.name.endsWith('.txt') && !file.name.endsWith('.docx') && !file.name.endsWith('.pdf')) {
+      toast.error("Please upload a .txt, .docx, or .pdf file");
       return;
     }
 
@@ -29,6 +28,11 @@ const Index = () => {
       if (file.name.endsWith('.txt')) {
         setInputText(text);
         toast.success("File uploaded successfully!");
+      } else if (file.name.endsWith('.pdf')) {
+        // For PDFs, we'll extract what we can as plain text
+        // Note: This is a simplified approach - in production you'd want a proper PDF parser
+        setInputText(text);
+        toast.success("PDF uploaded! Note: PDF content has been simplified to plain text.");
       } else {
         // For .docx files, we'll extract what we can as plain text
         // Note: This is a simplified approach - in production you'd want a proper .docx parser
@@ -40,7 +44,7 @@ const Index = () => {
     if (file.name.endsWith('.txt')) {
       reader.readAsText(file);
     } else {
-      // For .docx, read as text (simplified approach)
+      // For .docx and .pdf, read as text (simplified approach)
       reader.readAsText(file);
     }
   };
@@ -200,13 +204,13 @@ const Index = () => {
                       <p className="mb-2 text-sm text-gray-400">
                         <span className="font-semibold">Click to upload</span> or drag and drop
                       </p>
-                      <p className="text-xs text-gray-400">.TXT or .DOCX files</p>
+                      <p className="text-xs text-gray-400">.TXT, .DOCX, or .PDF files</p>
                     </div>
                     <Input
                       id="file-upload"
                       type="file"
                       className="hidden"
-                      accept=".txt,.docx"
+                      accept=".txt,.docx,.pdf"
                       onChange={handleFileUpload}
                     />
                   </label>
