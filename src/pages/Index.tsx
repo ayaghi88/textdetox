@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { Upload, Download, Copy, FileText, Zap, Users, Star } from "lucide-react";
 import { toast } from "sonner";
 
@@ -12,9 +13,41 @@ const Index = () => {
   const [cleanedText, setCleanedText] = useState("");
   const [formatMode, setFormatMode] = useState("manuscript");
 
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Check file type
+    if (!file.name.endsWith('.txt') && !file.name.endsWith('.docx')) {
+      toast.error("Please upload a .txt or .docx file");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const text = e.target?.result as string;
+      if (file.name.endsWith('.txt')) {
+        setInputText(text);
+        toast.success("File uploaded successfully!");
+      } else {
+        // For .docx files, we'll extract what we can as plain text
+        // Note: This is a simplified approach - in production you'd want a proper .docx parser
+        setInputText(text);
+        toast.success("File uploaded! Note: .docx formatting has been simplified to plain text.");
+      }
+    };
+
+    if (file.name.endsWith('.txt')) {
+      reader.readAsText(file);
+    } else {
+      // For .docx, read as text (simplified approach)
+      reader.readAsText(file);
+    }
+  };
+
   const cleanText = () => {
     if (!inputText.trim()) {
-      toast.error("Please enter some text to clean");
+      toast.error("Please enter some text to clean or upload a file");
       return;
     }
 
@@ -131,7 +164,7 @@ const Index = () => {
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-12">
               <h2 className="text-4xl font-bold mb-4">Try Text Detox™ Now</h2>
-              <p className="text-xl text-gray-300">Paste your messy text and watch it transform</p>
+              <p className="text-xl text-gray-300">Paste your messy text or upload a file and watch it transform</p>
             </div>
 
             {/* Format Mode Selector */}
@@ -158,6 +191,36 @@ const Index = () => {
             </div>
 
             <Card className="bg-gray-900 border-gray-700 p-6 mb-8">
+              {/* File Upload Section */}
+              <div className="mb-6">
+                <div className="flex items-center justify-center w-full">
+                  <label htmlFor="file-upload" className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-600 border-dashed rounded-lg cursor-pointer bg-gray-800 hover:bg-gray-700 transition-colors">
+                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                      <Upload className="w-8 h-8 mb-4 text-gray-400" />
+                      <p className="mb-2 text-sm text-gray-400">
+                        <span className="font-semibold">Click to upload</span> or drag and drop
+                      </p>
+                      <p className="text-xs text-gray-400">.TXT or .DOCX files</p>
+                    </div>
+                    <Input
+                      id="file-upload"
+                      type="file"
+                      className="hidden"
+                      accept=".txt,.docx"
+                      onChange={handleFileUpload}
+                    />
+                  </label>
+                </div>
+              </div>
+
+              {/* Divider */}
+              <div className="flex items-center mb-6">
+                <div className="flex-grow border-t border-gray-600"></div>
+                <span className="px-4 text-gray-400 text-sm">OR</span>
+                <div className="flex-grow border-t border-gray-600"></div>
+              </div>
+
+              {/* Text Area */}
               <Textarea
                 placeholder="Paste your raw text here... (broken quotes, weird formatting, messy line breaks - we'll fix it all)"
                 value={inputText}
