@@ -4,7 +4,8 @@ import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Upload, Download, Copy, FileText, Zap, Users, Star } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Upload, Download, Copy, FileText, Zap, Star, Check } from "lucide-react";
 import { toast } from "sonner";
 
 const Index = () => {
@@ -49,20 +50,51 @@ const Index = () => {
     }
   };
 
+  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+  const [showCheckout, setShowCheckout] = useState(false);
+
   const cleanText = () => {
     if (!inputText.trim()) {
       toast.error("Please enter some text to clean or upload a file");
       return;
     }
 
-    // Basic text cleaning simulation
     let cleaned = inputText
-      .replace(/[""]/g, '"') // Replace smart quotes
-      .replace(/['']/g, "'") // Replace smart apostrophes
-      .replace(/—/g, "--") // Replace em dashes
-      .replace(/–/g, "-") // Replace en dashes
-      .replace(/\s+/g, " ") // Normalize spaces
-      .replace(/\n\s*\n/g, "\n\n") // Fix line breaks
+      // Remove invisible / zero-width characters
+      .replace(/[\u200B\u200C\u200D\uFEFF\u00AD\u2060\u180E]/g, "")
+      // Remove BOM markers
+      .replace(/^\uFEFF/, "")
+      // Fix smart quotes
+      .replace(/[\u201C\u201D\u201E\u201F\u2033\u2036""]/g, '"')
+      .replace(/[\u2018\u2019\u201A\u201B\u2032\u2035'']/g, "'")
+      // Fix dashes
+      .replace(/\u2014/g, "--") // em dash
+      .replace(/\u2013/g, "-") // en dash
+      .replace(/\u2015/g, "--") // horizontal bar
+      // Fix ellipsis
+      .replace(/\u2026/g, "...")
+      .replace(/\.{4,}/g, "...")
+      // Fix non-breaking & unusual spaces
+      .replace(/[\u00A0\u2007\u202F\u2000-\u200A]/g, " ")
+      // Remove control characters (except newline/tab)
+      .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, "")
+      // Fix common mojibake patterns
+      .replace(/â€™/g, "'")
+      .replace(/â€œ/g, '"')
+      .replace(/â€\u009D/g, '"')
+      .replace(/â€"/g, "--")
+      .replace(/â€"/g, "-")
+      .replace(/Ã©/g, "é")
+      .replace(/Ã¨/g, "è")
+      .replace(/Ã¼/g, "ü")
+      .replace(/Ã¶/g, "ö")
+      .replace(/Ã¤/g, "ä")
+      .replace(/Ã±/g, "ñ")
+      // Normalize punctuation spacing
+      .replace(/\s+([.,;:!?])/g, "$1") // no space before punctuation
+      .replace(/([.,;:!?])(?=[A-Za-z])/g, "$1 ") // space after punctuation
+      .replace(/\s{2,}/g, " ") // collapse multiple spaces
+      .replace(/\n{3,}/g, "\n\n") // max two newlines
       .trim();
 
     setCleanedText(cleaned);
@@ -380,37 +412,46 @@ const Index = () => {
             <h2 className="text-4xl font-bold mb-4">Start Free. Upgrade When You're Ready.</h2>
           </div>
           <div className="max-w-4xl mx-auto grid md:grid-cols-3 gap-8">
-            <Card className="bg-gray-900 border-gray-700 p-6">
-              <h3 className="text-xl font-bold mb-4">Free</h3>
-              <p className="text-3xl font-bold mb-4">$0</p>
+            <Card 
+              className={`bg-gray-900 border-2 p-6 cursor-pointer transition-all ${selectedPlan === 'free' ? 'border-red-500 ring-2 ring-red-500/30' : 'border-gray-700 hover:border-gray-500'}`}
+              onClick={() => setSelectedPlan('free')}
+            >
+              <h3 className="text-xl font-bold mb-4 text-white">Free</h3>
+              <p className="text-3xl font-bold mb-4 text-white">$0</p>
               <ul className="space-y-2 mb-6">
-                <li className="flex items-center"><Badge className="bg-green-600 mr-2">✓</Badge>Basic text cleanup</li>
-                <li className="flex items-center"><Badge className="bg-green-600 mr-2">✓</Badge>Export to TXT</li>
+                <li className="flex items-center text-gray-200"><Check className="h-4 w-4 text-green-400 mr-2 shrink-0" />Basic text cleanup</li>
+                <li className="flex items-center text-gray-200"><Check className="h-4 w-4 text-green-400 mr-2 shrink-0" />Export to TXT</li>
               </ul>
-              <Button className="w-full bg-gray-700 hover:bg-gray-600">Get Started</Button>
+              <Button className="w-full bg-gray-700 hover:bg-gray-600 text-white">Get Started</Button>
             </Card>
             
-            <Card className="bg-red-900 border-red-600 p-6 relative">
-              <Badge className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-red-600">POPULAR</Badge>
-              <h3 className="text-xl font-bold mb-4">Pro</h3>
-              <p className="text-3xl font-bold mb-4">$9.99<span className="text-base">/month</span></p>
+            <Card 
+              className={`bg-red-950 border-2 p-6 relative cursor-pointer transition-all ${selectedPlan === 'pro' ? 'border-red-500 ring-2 ring-red-500/30' : 'border-red-700 hover:border-red-500'}`}
+              onClick={() => setSelectedPlan('pro')}
+            >
+              <Badge className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-red-600 text-white">POPULAR</Badge>
+              <h3 className="text-xl font-bold mb-4 text-white">Pro</h3>
+              <p className="text-3xl font-bold mb-4 text-white">$9.99<span className="text-base text-gray-300">/month</span></p>
               <ul className="space-y-2 mb-6">
-                <li className="flex items-center"><Badge className="bg-green-600 mr-2">✓</Badge>AI rewrite & tone adjust</li>
-                <li className="flex items-center"><Badge className="bg-green-600 mr-2">✓</Badge>All format templates</li>
-                <li className="flex items-center"><Badge className="bg-green-600 mr-2">✓</Badge>PDF & DOCX export</li>
+                <li className="flex items-center text-gray-200"><Check className="h-4 w-4 text-green-400 mr-2 shrink-0" />AI rewrite & tone adjust</li>
+                <li className="flex items-center text-gray-200"><Check className="h-4 w-4 text-green-400 mr-2 shrink-0" />All format templates</li>
+                <li className="flex items-center text-gray-200"><Check className="h-4 w-4 text-green-400 mr-2 shrink-0" />PDF & DOCX export</li>
               </ul>
-              <Button className="w-full bg-red-600 hover:bg-red-700">START DETOXING</Button>
+              <Button className="w-full bg-red-600 hover:bg-red-700 text-white" onClick={(e) => { e.stopPropagation(); setSelectedPlan('pro'); setShowCheckout(true); }}>START DETOXING</Button>
             </Card>
             
-            <Card className="bg-gray-900 border-gray-700 p-6">
-              <h3 className="text-xl font-bold mb-4">Lifetime</h3>
-              <p className="text-3xl font-bold mb-4">$29<span className="text-base"> once</span></p>
+            <Card 
+              className={`bg-gray-900 border-2 p-6 cursor-pointer transition-all ${selectedPlan === 'lifetime' ? 'border-red-500 ring-2 ring-red-500/30' : 'border-gray-700 hover:border-gray-500'}`}
+              onClick={() => setSelectedPlan('lifetime')}
+            >
+              <h3 className="text-xl font-bold mb-4 text-white">Lifetime</h3>
+              <p className="text-3xl font-bold mb-4 text-white">$29<span className="text-base text-gray-300"> once</span></p>
               <ul className="space-y-2 mb-6">
-                <li className="flex items-center"><Badge className="bg-green-600 mr-2">✓</Badge>Everything in Pro</li>
-                <li className="flex items-center"><Badge className="bg-green-600 mr-2">✓</Badge>Lifetime access</li>
-                <li className="flex items-center"><Badge className="bg-green-600 mr-2">✓</Badge>Priority support</li>
+                <li className="flex items-center text-gray-200"><Check className="h-4 w-4 text-green-400 mr-2 shrink-0" />Everything in Pro</li>
+                <li className="flex items-center text-gray-200"><Check className="h-4 w-4 text-green-400 mr-2 shrink-0" />Lifetime access</li>
+                <li className="flex items-center text-gray-200"><Check className="h-4 w-4 text-green-400 mr-2 shrink-0" />Priority support</li>
               </ul>
-              <Button className="w-full bg-gray-700 hover:bg-gray-600">Limited Offer</Button>
+              <Button className="w-full bg-gray-700 hover:bg-gray-600 text-white" onClick={(e) => { e.stopPropagation(); setSelectedPlan('lifetime'); setShowCheckout(true); }}>Limited Offer</Button>
             </Card>
           </div>
         </div>
@@ -432,6 +473,49 @@ const Index = () => {
           </div>
         </div>
       </footer>
+      {/* Mock Checkout Dialog */}
+      <Dialog open={showCheckout} onOpenChange={setShowCheckout}>
+        <DialogContent className="bg-gray-900 border-gray-700 text-white sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-white text-xl">
+              {selectedPlan === 'pro' ? 'Pro Plan — $9.99/month' : 'Lifetime Plan — $29 one-time'}
+            </DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Complete your purchase to unlock all premium features.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 mt-4">
+            <div>
+              <label className="text-sm text-gray-300 mb-1 block">Email</label>
+              <Input placeholder="you@email.com" className="bg-gray-800 border-gray-600 text-white" />
+            </div>
+            <div>
+              <label className="text-sm text-gray-300 mb-1 block">Card Number</label>
+              <Input placeholder="4242 4242 4242 4242" className="bg-gray-800 border-gray-600 text-white" />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm text-gray-300 mb-1 block">Expiry</label>
+                <Input placeholder="MM/YY" className="bg-gray-800 border-gray-600 text-white" />
+              </div>
+              <div>
+                <label className="text-sm text-gray-300 mb-1 block">CVC</label>
+                <Input placeholder="123" className="bg-gray-800 border-gray-600 text-white" />
+              </div>
+            </div>
+            <Button 
+              className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3"
+              onClick={() => {
+                setShowCheckout(false);
+                toast.success("Payment integration coming soon! This is a preview of the checkout flow.");
+              }}
+            >
+              PAY {selectedPlan === 'pro' ? '$9.99' : '$29.00'}
+            </Button>
+            <p className="text-xs text-gray-500 text-center">This is a demo checkout. No charges will be made.</p>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
