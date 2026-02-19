@@ -53,7 +53,9 @@ const TermsOfService = () => {
 
           <section>
             <h2 className="text-xl font-semibold text-white mb-3">6. Refund Policy</h2>
-            <p>We offer refunds on a case-by-case basis. If you are unsatisfied with the Service, please contact us within 7 days of purchase at <a href="mailto:customer.service@textdetoxalchemy.com" className="text-red-400 hover:text-red-300 underline">customer.service@textdetoxalchemy.com</a>. Refund requests after 7 days may not be honored.</p>
+            <p className="mb-2">Due to the nature of our digital service, <strong className="text-white">all sales are final once content has been generated, cleaned, or processed</strong> through the Service. This includes text cleaning, AI rewrites, tone adjustments, and document exports.</p>
+            <p className="mb-2">Since our Service delivers instant digital results that cannot be "returned," refunds are generally not available after content has been processed.</p>
+            <p>If you experience a technical issue that prevents the Service from functioning as described, please contact us within 48 hours at <a href="mailto:customer.service@textdetoxalchemy.com" className="text-red-400 hover:text-red-300 underline">customer.service@textdetoxalchemy.com</a> and we will work to resolve the issue or consider a refund at our discretion.</p>
           </section>
 
           <section>
@@ -95,7 +97,7 @@ const TermsOfService = () => {
 
           <section>
             <h2 className="text-xl font-semibold text-white mb-3">13. Governing Law</h2>
-            <p>These Terms shall be governed by and construed in accordance with applicable law, without regard to conflict of law principles.</p>
+            <p>These Terms shall be governed by and construed in accordance with the laws of the State of Louisiana, United States, without regard to conflict of law principles. Any disputes arising from these Terms shall be resolved in the courts located in Baton Rouge, Louisiana.</p>
           </section>
 
           <section>
