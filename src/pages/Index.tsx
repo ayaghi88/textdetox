@@ -87,6 +87,7 @@ const Index = () => {
     let cleaned = inputText
       .replace(/[\u200B\u200C\u200D\uFEFF\u00AD\u2060\u180E]/g, "")
       .replace(/^\uFEFF/, "")
+      .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{FE00}-\u{FE0F}\u{200D}\u{20E3}\u{E0020}-\u{E007F}]/gu, "")
       .replace(/[\u201C\u201D\u201E\u201F\u2033\u2036""]/g, '"')
       .replace(/[\u2018\u2019\u201A\u201B\u2032\u2035'']/g, "'")
       .replace(/\u2014/g, "--")
@@ -550,15 +551,8 @@ const Index = () => {
       {/* Footer */}
       <footer id="about" className="py-20 bg-black border-t border-gray-800">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">About the Founder</h2>
-            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              Amber Yaghi is the visionary behind Text Detox™, a street scholar and manifestation architect who flipped her pain into publishing and now builds tools for the underdog creative.
-            </p>
-            <p className="text-red-400 mt-4">Follow her journey @hushlaoftheyear</p>
-          </div>
           <div className="text-center text-gray-500">
-            <p>&copy; 2024 Text Detox™. Built by creators, for creators.</p>
+            <p>&copy; {new Date().getFullYear()} Text Detox™. Built by creators, for creators.</p>
           </div>
         </div>
       </footer>
