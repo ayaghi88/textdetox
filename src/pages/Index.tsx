@@ -1,4 +1,5 @@
 import { useState } from "react";
+import mammoth from "mammoth";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -31,22 +32,35 @@ const Index = () => {
   const navigate = useNavigate();
   const { user, subscription, signOut, checkSubscription } = useAuth();
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    if (!file.name.endsWith('.txt') && !file.name.endsWith('.docx') && !file.name.endsWith('.pdf')) {
+    const ext = file.name.split('.').pop()?.toLowerCase();
+    if (!['txt', 'docx', 'pdf'].includes(ext || '')) {
       toast.error("Please upload a .txt, .docx, or .pdf file");
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const text = e.target?.result as string;
-      setInputText(text);
-      toast.success("File uploaded successfully!");
-    };
-    reader.readAsText(file);
+    try {
+      if (ext === 'docx') {
+        const arrayBuffer = await file.arrayBuffer();
+        const result = await mammoth.extractRawText({ arrayBuffer });
+        setInputText(result.value);
+        toast.success("DOCX uploaded and text extracted!");
+      } else {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const text = e.target?.result as string;
+          setInputText(text);
+          toast.success("File uploaded successfully!");
+        };
+        reader.readAsText(file);
+      }
+    } catch (err) {
+      toast.error("Failed to read file. Please try a different format.");
+      console.error("File upload error:", err);
+    }
   };
 
   const cleanText = () => {
