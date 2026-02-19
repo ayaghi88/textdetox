@@ -1,5 +1,8 @@
 import { useState } from "react";
 import mammoth from "mammoth";
+import * as pdfjsLib from "pdfjs-dist";
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.mjs`;
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -48,6 +51,18 @@ const Index = () => {
         const result = await mammoth.extractRawText({ arrayBuffer });
         setInputText(result.value);
         toast.success("DOCX uploaded and text extracted!");
+      } else if (ext === 'pdf') {
+        const arrayBuffer = await file.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        let fullText = "";
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const page = await pdf.getPage(i);
+          const content = await page.getTextContent();
+          const pageText = content.items.map((item: any) => item.str).join(" ");
+          fullText += pageText + "\n\n";
+        }
+        setInputText(fullText.trim());
+        toast.success("PDF uploaded and text extracted!");
       } else {
         const reader = new FileReader();
         reader.onload = (e) => {
