@@ -702,8 +702,15 @@ const Index = () => {
       {/* Footer */}
       <footer id="about" className="py-20 bg-black border-t border-gray-800">
         <div className="container mx-auto px-4">
-          <div className="text-center text-gray-500">
-            <p>&copy; {new Date().getFullYear()} Text Detox™. Built by creators, for creators.</p>
+          <div className="text-center text-gray-500 space-y-3">
+            <p>&copy; {new Date().getFullYear()} Text Detox Alchemy. Built by creators, for creators.</p>
+            <div className="flex justify-center gap-4 text-sm">
+              <a href="/privacy" className="hover:text-gray-300 underline">Privacy Policy</a>
+              <span>·</span>
+              <a href="/terms" className="hover:text-gray-300 underline">Terms of Service</a>
+              <span>·</span>
+              <a href="mailto:customer.service@textdetoxalchemy.com" className="hover:text-gray-300 underline">Contact</a>
+            </div>
           </div>
         </div>
       </footer>
