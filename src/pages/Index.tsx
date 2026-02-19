@@ -117,8 +117,24 @@ const Index = () => {
       .replace(/\n{3,}/g, "\n\n")
       .trim();
 
+    // Apply format-specific adjustments
+    if (formatMode === "caption") {
+      // Social media caption: compact, no indentation, line breaks for readability
+      cleaned = cleaned
+        .replace(/\n{2,}/g, "\n\n")
+        .replace(/^[ \t]+/gm, "") // remove leading whitespace per line
+        .replace(/(.{300,?})\. /g, "$1.\n\n") // break long blocks into readable chunks
+        .trim();
+    } else if (formatMode === "email") {
+      // Email: clean paragraphs, no indentation, double-spaced paragraphs
+      cleaned = cleaned
+        .replace(/^[ \t]+/gm, "") // remove indentation
+        .replace(/\n{3,}/g, "\n\n") // normalize spacing
+        .trim();
+    }
+
     setCleanedText(cleaned);
-    toast.success("Text cleaned successfully!");
+    toast.success(`Text cleaned for ${formatMode === "manuscript" ? "manuscript" : formatMode === "caption" ? "social caption" : "email"} format!`);
   };
 
   const copyToClipboard = () => {
