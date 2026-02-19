@@ -11,7 +11,7 @@ import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Upload, Download, Copy, FileText, Zap, Star, Check, LogOut, User } from "lucide-react";
+import { Upload, Download, Copy, FileText, Zap, Star, Check, LogOut, User, Wand2, Volume2 } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -35,6 +35,8 @@ const Index = () => {
   const [cleanedText, setCleanedText] = useState("");
   const [formatMode, setFormatMode] = useState("manuscript");
   const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [selectedTone, setSelectedTone] = useState("professional");
   const navigate = useNavigate();
   const { user, subscription, signOut, checkSubscription } = useAuth();
 
@@ -214,7 +216,31 @@ const Index = () => {
     toast.success("PDF exported!");
   };
 
-  const handleCheckout = async (plan: "pro" | "lifetime") => {
+  const handleAiRewrite = async (mode: "rewrite" | "tone") => {
+    if (!cleanedText) return;
+    if (!subscription.subscribed) {
+      toast.error("AI features require a Pro or Lifetime plan");
+      return;
+    }
+    setAiLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("ai-rewrite", {
+        body: { text: cleanedText, mode, tone: selectedTone },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      if (data?.result) {
+        setCleanedText(data.result);
+        toast.success(mode === "rewrite" ? "Text rewritten!" : `Tone adjusted to ${selectedTone}!`);
+      }
+    } catch (err: any) {
+      toast.error(err.message || "AI rewrite failed");
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
+
     if (!user) {
       navigate("/auth");
       return;
@@ -443,6 +469,49 @@ const Index = () => {
                     )}
                   </div>
                 </div>
+
+                {/* AI Tools Section */}
+                <div className="flex flex-wrap items-center gap-2 mb-4">
+                  {subscription.subscribed ? (
+                    <>
+                      <Button
+                        size="sm"
+                        onClick={() => handleAiRewrite("rewrite")}
+                        disabled={aiLoading}
+                        className="bg-purple-600 hover:bg-purple-700 text-white font-bold"
+                      >
+                        <Wand2 className="h-4 w-4 mr-2" />
+                        {aiLoading ? "REWRITING..." : "AI REWRITE"}
+                      </Button>
+                      <select
+                        value={selectedTone}
+                        onChange={(e) => setSelectedTone(e.target.value)}
+                        className="bg-gray-800 border border-gray-600 text-white text-sm rounded px-2 py-1.5"
+                      >
+                        <option value="professional">Professional</option>
+                        <option value="casual">Casual</option>
+                        <option value="persuasive">Persuasive</option>
+                        <option value="academic">Academic</option>
+                        <option value="creative">Creative</option>
+                      </select>
+                      <Button
+                        size="sm"
+                        onClick={() => handleAiRewrite("tone")}
+                        disabled={aiLoading}
+                        className="bg-purple-600 hover:bg-purple-700 text-white font-bold"
+                      >
+                        <Volume2 className="h-4 w-4 mr-2" />
+                        {aiLoading ? "ADJUSTING..." : "ADJUST TONE"}
+                      </Button>
+                    </>
+                  ) : (
+                    <Button size="sm" disabled className="bg-gray-700 text-gray-400 cursor-not-allowed">
+                      <Wand2 className="h-4 w-4 mr-2" />
+                      AI Rewrite & Tone (Pro)
+                    </Button>
+                  )}
+                </div>
+
                 <div className="bg-gray-800 p-4 rounded-lg">
                   <pre className="whitespace-pre-wrap text-gray-200 font-mono text-sm">{cleanedText}</pre>
                 </div>
