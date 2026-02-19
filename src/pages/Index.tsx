@@ -240,7 +240,7 @@ const Index = () => {
     }
   };
 
-
+  const handleCheckout = async (plan: "pro" | "lifetime") => {
     if (!user) {
       navigate("/auth");
       return;
