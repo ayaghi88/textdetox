@@ -466,7 +466,7 @@ const Index = () => {
                     </Button>
                     {effectiveSubscription.subscribed ? (
                       <>
-                        <Button variant="outline" size="sm" onClick={exportPDF} className="border-gray-600 text-gray-300 hover:bg-gray-800">
+                        <Button variant="outline" size="sm" onClick={exportPDF} className="border-gray-600 text-white hover:bg-gray-800">
                           <Download className="h-4 w-4 mr-2" />
                           PDF
                         </Button>
