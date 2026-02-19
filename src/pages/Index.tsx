@@ -416,11 +416,11 @@ const Index = () => {
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-lg font-semibold">Cleaned Text</h3>
                   <div className="flex flex-wrap gap-2">
-                    <Button variant="outline" size="sm" onClick={copyToClipboard} className="border-gray-600 text-gray-300 hover:bg-gray-800">
+                    <Button size="sm" onClick={copyToClipboard} className="bg-white text-black hover:bg-gray-200 font-bold">
                       <Copy className="h-4 w-4 mr-2" />
                       COPY
                     </Button>
-                    <Button variant="outline" size="sm" onClick={downloadText} className="border-gray-600 text-gray-300 hover:bg-gray-800">
+                    <Button size="sm" onClick={downloadText} className="bg-white text-black hover:bg-gray-200 font-bold">
                       <Download className="h-4 w-4 mr-2" />
                       TXT
                     </Button>
