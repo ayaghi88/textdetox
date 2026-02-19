@@ -40,9 +40,8 @@ const Index = () => {
   const navigate = useNavigate();
   const { user, subscription, signOut, checkSubscription } = useAuth();
 
-  // Allow testing Pro features with ?test_pro=true in the URL
-  const searchParams = new URLSearchParams(window.location.search);
-  const testProMode = searchParams.get("test_pro") === "true";
+  // Dev toggle for testing Pro features without paying
+  const [testProMode, setTestProMode] = useState(false);
   const effectiveSubscription = testProMode
     ? { subscribed: true, lifetime: false, isSubscription: true, productId: null, subscriptionEnd: null }
     : subscription;
@@ -303,6 +302,14 @@ const Index = () => {
                     {effectiveSubscription.lifetime ? "LIFETIME" : testProMode ? "TEST MODE" : "PRO"}
                   </Badge>
                 )}
+                <Button
+                  size="sm"
+                  variant={testProMode ? "destructive" : "outline"}
+                  onClick={() => setTestProMode(!testProMode)}
+                  className="text-xs h-7 px-2"
+                >
+                  {testProMode ? "Exit Test Mode" : "🧪 Test Pro"}
+                </Button>
                 <Button variant="ghost" size="sm" onClick={handleManageSubscription} className="text-gray-300 hover:text-white">
                   <User className="h-4 w-4 mr-1" />
                   Account
