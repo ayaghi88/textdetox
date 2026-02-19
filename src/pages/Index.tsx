@@ -3,6 +3,7 @@ import mammoth from "mammoth";
 import * as pdfjsLib from "pdfjs-dist";
 import { Document, Packer, Paragraph, TextRun, AlignmentType } from "docx";
 import { saveAs } from "file-saver";
+import { jsPDF } from "jspdf";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.mjs`;
 import { Button } from "@/components/ui/button";
@@ -170,6 +171,31 @@ const Index = () => {
     const blob = await Packer.toBlob(doc);
     saveAs(blob, "kdp-ready-manuscript.docx");
     toast.success("KDP-ready DOCX exported!");
+  };
+
+  const exportPDF = () => {
+    if (!cleanedText) return;
+    const doc = new jsPDF();
+    const margin = 20;
+    const pageWidth = doc.internal.pageSize.getWidth() - margin * 2;
+    const lineHeight = 7;
+    let y = margin;
+
+    doc.setFont("times", "normal");
+    doc.setFontSize(12);
+
+    const lines = doc.splitTextToSize(cleanedText, pageWidth);
+    for (const line of lines) {
+      if (y + lineHeight > doc.internal.pageSize.getHeight() - margin) {
+        doc.addPage();
+        y = margin;
+      }
+      doc.text(line, margin, y);
+      y += lineHeight;
+    }
+
+    doc.save("detoxed-text.pdf");
+    toast.success("PDF exported!");
   };
 
   const handleCheckout = async (plan: "pro" | "lifetime") => {
@@ -373,19 +399,32 @@ const Index = () => {
               <Card className="bg-gray-900 border-gray-700 p-6">
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-lg font-semibold">Cleaned Text</h3>
-                  <div className="flex space-x-2">
+                  <div className="flex flex-wrap gap-2">
                     <Button variant="outline" size="sm" onClick={copyToClipboard} className="border-gray-600 text-gray-300 hover:bg-gray-800">
                       <Copy className="h-4 w-4 mr-2" />
                       COPY
                     </Button>
                     <Button variant="outline" size="sm" onClick={downloadText} className="border-gray-600 text-gray-300 hover:bg-gray-800">
                       <Download className="h-4 w-4 mr-2" />
-                      DOWNLOAD
+                      TXT
                     </Button>
-                    <Button size="sm" onClick={exportKDP} className="bg-red-600 hover:bg-red-700 text-white">
-                      <FileText className="h-4 w-4 mr-2" />
-                      KDP EXPORT
-                    </Button>
+                    {subscription.subscribed ? (
+                      <>
+                        <Button variant="outline" size="sm" onClick={exportPDF} className="border-gray-600 text-gray-300 hover:bg-gray-800">
+                          <Download className="h-4 w-4 mr-2" />
+                          PDF
+                        </Button>
+                        <Button size="sm" onClick={exportKDP} className="bg-red-600 hover:bg-red-700 text-white">
+                          <FileText className="h-4 w-4 mr-2" />
+                          DOCX (KDP)
+                        </Button>
+                      </>
+                    ) : (
+                      <Button size="sm" disabled className="bg-gray-700 text-gray-400 cursor-not-allowed">
+                        <FileText className="h-4 w-4 mr-2" />
+                        PDF / DOCX (Pro)
+                      </Button>
+                    )}
                   </div>
                 </div>
                 <div className="bg-gray-800 p-4 rounded-lg">
