@@ -89,13 +89,8 @@ const Index = () => {
     }
   };
 
-  const cleanText = () => {
-    if (!inputText.trim()) {
-      toast.error("Please enter some text to clean or upload a file");
-      return;
-    }
-
-    let cleaned = inputText
+  const applyClean = (text: string): string => {
+    let cleaned = text
       .replace(/[\u200B\u200C\u200D\uFEFF\u00AD\u2060\u180E]/g, "")
       .replace(/^\uFEFF/, "")
       .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{FE00}-\u{FE0F}\u{200D}\u{20E3}\u{E0020}-\u{E007F}]/gu, "")
@@ -125,23 +120,28 @@ const Index = () => {
       .replace(/\n{3,}/g, "\n\n")
       .trim();
 
-    // Apply format-specific adjustments
     if (formatMode === "caption") {
-      // Social media caption: compact, no indentation, line breaks for readability
       cleaned = cleaned
         .replace(/\n{2,}/g, "\n\n")
-        .replace(/^[ \t]+/gm, "") // remove leading whitespace per line
-        .replace(/(.{300,?})\. /g, "$1.\n\n") // break long blocks into readable chunks
+        .replace(/^[ \t]+/gm, "")
+        .replace(/(.{300,?})\. /g, "$1.\n\n")
         .trim();
     } else if (formatMode === "email") {
-      // Email: clean paragraphs, no indentation, double-spaced paragraphs
       cleaned = cleaned
-        .replace(/^[ \t]+/gm, "") // remove indentation
-        .replace(/\n{3,}/g, "\n\n") // normalize spacing
+        .replace(/^[ \t]+/gm, "")
+        .replace(/\n{3,}/g, "\n\n")
         .trim();
     }
 
-    setCleanedText(cleaned);
+    return cleaned;
+  };
+
+  const cleanText = () => {
+    if (!inputText.trim()) {
+      toast.error("Please enter some text to clean or upload a file");
+      return;
+    }
+    setCleanedText(applyClean(inputText));
     toast.success(`Text cleaned for ${formatMode === "manuscript" ? "manuscript" : formatMode === "caption" ? "social caption" : "email"} format!`);
   };
 
@@ -236,8 +236,8 @@ const Index = () => {
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
       if (data?.result) {
-        setCleanedText(data.result);
-        toast.success(mode === "rewrite" ? "Text rewritten!" : `Tone adjusted to ${selectedTone}!`);
+        setCleanedText(applyClean(data.result));
+        toast.success(mode === "rewrite" ? "Text rewritten & cleaned!" : `Tone adjusted to ${selectedTone} & cleaned!`);
       }
     } catch (err: any) {
       toast.error(err.message || "AI rewrite failed");
