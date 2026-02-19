@@ -40,6 +40,13 @@ const Index = () => {
   const navigate = useNavigate();
   const { user, subscription, signOut, checkSubscription } = useAuth();
 
+  // Allow testing Pro features with ?test_pro=true in the URL
+  const searchParams = new URLSearchParams(window.location.search);
+  const testProMode = searchParams.get("test_pro") === "true";
+  const effectiveSubscription = testProMode
+    ? { subscribed: true, lifetime: false, isSubscription: true, productId: null, subscriptionEnd: null }
+    : subscription;
+
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -218,7 +225,7 @@ const Index = () => {
 
   const handleAiRewrite = async (mode: "rewrite" | "tone") => {
     if (!cleanedText) return;
-    if (!subscription.subscribed) {
+    if (!effectiveSubscription.subscribed) {
       toast.error("AI features require a Pro or Lifetime plan");
       return;
     }
@@ -291,9 +298,9 @@ const Index = () => {
           <div className="flex items-center space-x-3">
             {user ? (
               <>
-                {subscription.subscribed && (
+                {effectiveSubscription.subscribed && (
                   <Badge className="bg-green-600 text-white">
-                    {subscription.lifetime ? "LIFETIME" : "PRO"}
+                    {effectiveSubscription.lifetime ? "LIFETIME" : testProMode ? "TEST MODE" : "PRO"}
                   </Badge>
                 )}
                 <Button variant="ghost" size="sm" onClick={handleManageSubscription} className="text-gray-300 hover:text-white">
@@ -450,7 +457,7 @@ const Index = () => {
                       <Download className="h-4 w-4 mr-2" />
                       TXT
                     </Button>
-                    {subscription.subscribed ? (
+                    {effectiveSubscription.subscribed ? (
                       <>
                         <Button variant="outline" size="sm" onClick={exportPDF} className="border-gray-600 text-gray-300 hover:bg-gray-800">
                           <Download className="h-4 w-4 mr-2" />
@@ -472,7 +479,7 @@ const Index = () => {
 
                 {/* AI Tools Section */}
                 <div className="flex flex-wrap items-center gap-2 mb-4">
-                  {subscription.subscribed ? (
+                  {effectiveSubscription.subscribed ? (
                     <>
                       <Button
                         size="sm"
@@ -636,8 +643,8 @@ const Index = () => {
               </Button>
             </Card>
 
-            <Card className={`bg-red-950 border-2 p-6 relative ${subscription.isSubscription ? 'border-green-500 ring-2 ring-green-500/30' : 'border-red-700 hover:border-red-500'}`}>
-              {subscription.isSubscription ? (
+            <Card className={`bg-red-950 border-2 p-6 relative ${effectiveSubscription.isSubscription ? 'border-green-500 ring-2 ring-green-500/30' : 'border-red-700 hover:border-red-500'}`}>
+              {effectiveSubscription.isSubscription ? (
                 <Badge className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-green-600 text-white">YOUR PLAN</Badge>
               ) : (
                 <Badge className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-red-600 text-white">POPULAR</Badge>
@@ -649,7 +656,7 @@ const Index = () => {
                 <li className="flex items-center text-gray-200"><Check className="h-4 w-4 text-green-400 mr-2 shrink-0" />All format templates</li>
                 <li className="flex items-center text-gray-200"><Check className="h-4 w-4 text-green-400 mr-2 shrink-0" />PDF & DOCX export</li>
               </ul>
-              {subscription.isSubscription ? (
+              {effectiveSubscription.isSubscription ? (
                 <Button className="w-full bg-gray-700 hover:bg-gray-600 text-white" onClick={handleManageSubscription}>
                   MANAGE PLAN
                 </Button>
@@ -660,8 +667,8 @@ const Index = () => {
               )}
             </Card>
 
-            <Card className={`bg-gray-900 border-2 p-6 ${subscription.lifetime ? 'border-green-500 ring-2 ring-green-500/30' : 'border-gray-700 hover:border-gray-500'}`}>
-              {subscription.lifetime && (
+            <Card className={`bg-gray-900 border-2 p-6 ${effectiveSubscription.lifetime ? 'border-green-500 ring-2 ring-green-500/30' : 'border-gray-700 hover:border-gray-500'}`}>
+              {effectiveSubscription.lifetime && (
                 <Badge className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-green-600 text-white">YOUR PLAN</Badge>
               )}
               <h3 className="text-xl font-bold mb-4 text-white">Lifetime</h3>
@@ -671,7 +678,7 @@ const Index = () => {
                 <li className="flex items-center text-gray-200"><Check className="h-4 w-4 text-green-400 mr-2 shrink-0" />Lifetime access</li>
                 <li className="flex items-center text-gray-200"><Check className="h-4 w-4 text-green-400 mr-2 shrink-0" />Priority support</li>
               </ul>
-              {subscription.lifetime ? (
+              {effectiveSubscription.lifetime ? (
                 <Button className="w-full bg-gray-700 hover:bg-gray-600 text-white" disabled>
                   PURCHASED ✓
                 </Button>
