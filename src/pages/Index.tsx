@@ -1,6 +1,8 @@
 import { useState } from "react";
 import mammoth from "mammoth";
 import * as pdfjsLib from "pdfjs-dist";
+import { Document, Packer, Paragraph, TextRun, AlignmentType } from "docx";
+import { saveAs } from "file-saver";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.mjs`;
 import { Button } from "@/components/ui/button";
@@ -134,28 +136,40 @@ const Index = () => {
     toast.success("Download started!");
   };
 
-  const exportKDP = () => {
+  const exportKDP = async () => {
     if (!cleanedText) return;
 
     let kdp = cleanedText
       .replace(/"/g, '"').replace(/'/g, "'")
-      .replace(/\n(?!\n)/g, "\n    ")
       .replace(/\n{2,}/g, "\n\n")
       .replace(/[ \t]+$/gm, "")
       .replace(/\.  +/g, ". ")
       .replace(/^\s+/, "")
       .trim();
 
-    const header = "";
+    const paragraphs = kdp.split(/\n\n+/).map(
+      (para) =>
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: para.replace(/\n/g, " "),
+              size: 24, // 12pt
+              font: "Times New Roman",
+            }),
+          ],
+          spacing: { after: 200 },
+          indent: { firstLine: 720 }, // 0.5 inch
+          alignment: AlignmentType.LEFT,
+        })
+    );
 
-    const blob = new Blob([kdp], { type: "text/plain;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "kdp-ready-manuscript.txt";
-    a.click();
-    URL.revokeObjectURL(url);
-    toast.success("KDP-ready file exported!");
+    const doc = new Document({
+      sections: [{ children: paragraphs }],
+    });
+
+    const blob = await Packer.toBlob(doc);
+    saveAs(blob, "kdp-ready-manuscript.docx");
+    toast.success("KDP-ready DOCX exported!");
   };
 
   const handleCheckout = async (plan: "pro" | "lifetime") => {
