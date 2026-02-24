@@ -534,7 +534,7 @@ const Index = () => {
                     size="sm"
                     variant={compareView ? "default" : "outline"}
                     onClick={() => setCompareView(!compareView)}
-                    className={compareView ? "bg-red-600 hover:bg-red-700 text-white" : "border-gray-600 text-gray-300 hover:bg-gray-800"}
+                    className={compareView ? "bg-red-600 hover:bg-red-700 text-white font-bold" : "border-gray-600 text-white bg-gray-700 hover:bg-gray-600 font-bold"}
                   >
                     <ArrowLeftRight className="h-4 w-4 mr-2" />
                     {compareView ? "COMPARE ON" : "COMPARE"}
