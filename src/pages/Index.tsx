@@ -46,8 +46,16 @@ const Index = () => {
     if (!file) return;
 
     const ext = file.name.split('.').pop()?.toLowerCase();
-    if (!['txt', 'docx', 'pdf'].includes(ext || '')) {
-      toast.error("Please upload a .txt, .docx, or .pdf file");
+    const freeFormats = ['txt', 'docx'];
+    const paidFormats = ['txt', 'docx', 'pdf'];
+    const allowedFormats = subscription.subscribed ? paidFormats : freeFormats;
+
+    if (!allowedFormats.includes(ext || '')) {
+      if (!subscription.subscribed && ext === 'pdf') {
+        toast.error("PDF upload is a Pro feature. Please upgrade to upload PDF files.");
+      } else {
+        toast.error(`Please upload a ${allowedFormats.map(f => '.' + f.toUpperCase()).join(', ')} file`);
+      }
       return;
     }
 
@@ -406,13 +414,13 @@ const Index = () => {
                       <p className="mb-2 text-sm text-gray-400">
                         <span className="font-semibold">Click to upload</span> or drag and drop
                       </p>
-                      <p className="text-xs text-gray-400">.TXT, .DOCX, or .PDF files</p>
+                      <p className="text-xs text-gray-400">{subscription.subscribed ? '.TXT, .DOCX, or .PDF files' : '.TXT or .DOCX files (PDF requires Pro)'}</p>
                     </div>
                     <Input
                       id="file-upload"
                       type="file"
                       className="hidden"
-                      accept=".txt,.docx,.pdf"
+                      accept={subscription.subscribed ? ".txt,.docx,.pdf" : ".txt,.docx"}
                       onChange={handleFileUpload}
                     />
                   </label>
