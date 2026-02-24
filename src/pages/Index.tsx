@@ -11,7 +11,7 @@ import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Upload, Download, Copy, FileText, Zap, Star, Check, LogOut, User, Wand2, Volume2 } from "lucide-react";
+import { Upload, Download, Copy, FileText, Zap, Star, Check, LogOut, User, Wand2, Volume2, ArrowLeftRight } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -37,6 +37,7 @@ const Index = () => {
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
   const [selectedTone, setSelectedTone] = useState("professional");
+  const [compareView, setCompareView] = useState(false);
   const navigate = useNavigate();
   const { user, subscription, signOut, checkSubscription } = useAuth();
 
@@ -139,9 +140,15 @@ const Index = () => {
     return cleaned;
   };
 
+  const FREE_CHAR_LIMIT = 5000;
+
   const cleanText = () => {
     if (!inputText.trim()) {
       toast.error("Please enter some text to clean or upload a file");
+      return;
+    }
+    if (!subscription.subscribed && inputText.length > FREE_CHAR_LIMIT) {
+      toast.error(`Free plan is limited to ${FREE_CHAR_LIMIT.toLocaleString()} characters. Upgrade to Pro for unlimited.`);
       return;
     }
     setCleanedText(applyClean(inputText));
@@ -521,9 +528,42 @@ const Index = () => {
                   )}
                 </div>
 
-                <div className="bg-gray-800 p-4 rounded-lg">
-                  <pre className="whitespace-pre-wrap text-gray-200 font-mono text-sm">{cleanedText}</pre>
+                {/* Compare Toggle */}
+                <div className="flex items-center gap-2 mb-4">
+                  <Button
+                    size="sm"
+                    variant={compareView ? "default" : "outline"}
+                    onClick={() => setCompareView(!compareView)}
+                    className={compareView ? "bg-red-600 hover:bg-red-700 text-white" : "border-gray-600 text-gray-300 hover:bg-gray-800"}
+                  >
+                    <ArrowLeftRight className="h-4 w-4 mr-2" />
+                    {compareView ? "COMPARE ON" : "COMPARE"}
+                  </Button>
+                  {!subscription.subscribed && (
+                    <span className="text-xs text-gray-500">{inputText.length.toLocaleString()} / {FREE_CHAR_LIMIT.toLocaleString()} chars</span>
+                  )}
                 </div>
+
+                {compareView ? (
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-xs font-semibold text-red-400 uppercase mb-2">Original</p>
+                      <div className="bg-gray-800 p-4 rounded-lg h-64 overflow-y-auto">
+                        <pre className="whitespace-pre-wrap text-gray-400 font-mono text-sm">{inputText}</pre>
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold text-green-400 uppercase mb-2">Detoxed</p>
+                      <div className="bg-gray-800 p-4 rounded-lg h-64 overflow-y-auto">
+                        <pre className="whitespace-pre-wrap text-gray-200 font-mono text-sm">{cleanedText}</pre>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="bg-gray-800 p-4 rounded-lg">
+                    <pre className="whitespace-pre-wrap text-gray-200 font-mono text-sm">{cleanedText}</pre>
+                  </div>
+                )}
               </Card>
             )}
           </div>
@@ -638,7 +678,9 @@ const Index = () => {
               <p className="text-3xl font-bold mb-4 text-white">$0</p>
               <ul className="space-y-2 mb-6">
                 <li className="flex items-center text-gray-200"><Check className="h-4 w-4 text-green-400 mr-2 shrink-0" />Basic text cleanup</li>
+                <li className="flex items-center text-gray-200"><Check className="h-4 w-4 text-green-400 mr-2 shrink-0" />Upload TXT & DOCX</li>
                 <li className="flex items-center text-gray-200"><Check className="h-4 w-4 text-green-400 mr-2 shrink-0" />Export to TXT</li>
+                <li className="flex items-center text-gray-200"><Check className="h-4 w-4 text-green-400 mr-2 shrink-0" />5,000 character limit</li>
               </ul>
               <Button className="w-full bg-gray-700 hover:bg-gray-600 text-white" onClick={() => document.getElementById('app-demo')?.scrollIntoView({ behavior: 'smooth' })}>
                 Get Started
@@ -654,9 +696,11 @@ const Index = () => {
               <h3 className="text-xl font-bold mb-4 text-white">Pro</h3>
               <p className="text-3xl font-bold mb-4 text-white">$9.99<span className="text-base text-gray-300">/month</span></p>
               <ul className="space-y-2 mb-6">
+                <li className="flex items-center text-gray-200"><Check className="h-4 w-4 text-green-400 mr-2 shrink-0" />Upload TXT, DOCX & PDF</li>
                 <li className="flex items-center text-gray-200"><Check className="h-4 w-4 text-green-400 mr-2 shrink-0" />AI rewrite & tone adjust</li>
                 <li className="flex items-center text-gray-200"><Check className="h-4 w-4 text-green-400 mr-2 shrink-0" />All format templates</li>
                 <li className="flex items-center text-gray-200"><Check className="h-4 w-4 text-green-400 mr-2 shrink-0" />PDF & DOCX export</li>
+                <li className="flex items-center text-gray-200"><Check className="h-4 w-4 text-green-400 mr-2 shrink-0" />Unlimited characters</li>
               </ul>
               {subscription.isSubscription ? (
                 <Button className="w-full bg-gray-700 hover:bg-gray-600 text-white" onClick={handleManageSubscription}>
