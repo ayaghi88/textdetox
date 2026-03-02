@@ -124,18 +124,6 @@ const Index = () => {
       .replace(/\n{3,}/g, "\n\n")
       .trim();
 
-    if (formatMode === "caption") {
-      cleaned = cleaned
-        .replace(/\n{2,}/g, "\n\n")
-        .replace(/^[ \t]+/gm, "")
-        .replace(/(.{300,?})\. /g, "$1.\n\n")
-        .trim();
-    } else if (formatMode === "email") {
-      cleaned = cleaned
-        .replace(/^[ \t]+/gm, "")
-        .replace(/\n{3,}/g, "\n\n")
-        .trim();
-    }
 
     return cleaned;
   };
@@ -152,7 +140,7 @@ const Index = () => {
       return;
     }
     setCleanedText(applyClean(inputText));
-    toast.success(`Text cleaned for ${formatMode === "manuscript" ? "manuscript" : formatMode === "caption" ? "social caption" : "email"} format!`);
+    toast.success("Text cleaned for manuscript format!");
   };
 
   const copyToClipboard = () => {
@@ -390,27 +378,6 @@ const Index = () => {
             </div>
 
             {/* Format Mode Selector */}
-            <div className="flex justify-center mb-8">
-              <div className="flex bg-gray-800 rounded-lg p-1">
-                {[
-                  { id: 'manuscript', label: 'Manuscript' },
-                  { id: 'caption', label: 'Caption' },
-                  { id: 'email', label: 'Email' }
-                ].map((mode) => (
-                  <button
-                    key={mode.id}
-                    onClick={() => setFormatMode(mode.id)}
-                    className={`px-6 py-2 rounded-md transition-colors ${
-                      formatMode === mode.id
-                        ? 'bg-red-600 text-white'
-                        : 'text-gray-300 hover:text-white'
-                    }`}
-                  >
-                    {mode.label}
-                  </button>
-                ))}
-              </div>
-            </div>
 
             <Card className="bg-gray-900 border-gray-700 p-6 mb-8">
               <div className="mb-6">
